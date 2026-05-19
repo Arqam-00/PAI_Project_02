@@ -9,8 +9,8 @@ InputSize = 784
 HiddenSize = 128
 OutputSize = 10
 
-Epochs = 2000
-Lr = 0.01
+Epochs = 5000
+Lr = 0.1
 
 X = []
 Y = []
@@ -49,7 +49,8 @@ def Preprocess_Image(Image):
 def Load_Dataset():
     global X
     global Y
-
+    
+    plt.figure(figsize=(10, 5))
     for Digit in range(10):
         FolderPath = os.path.join("dataset", str(Digit))
         
@@ -62,16 +63,15 @@ def Load_Dataset():
 
             if ImageIndex == 0:
                 RGB = cv2.cvtColor(Image, cv2.COLOR_BGR2RGB)
-                plt.figure(figsize=(3, 3))
+                plt.subplot(2, 5, Digit + 1)
                 plt.imshow(RGB)
                 plt.title(f"Digit {Digit}")
                 plt.axis("off")
-                plt.show()
-
+            
             Processed = Preprocess_Image(Image)
             X.append(Processed)
             Y.append(Digit)
-
+    plt.show()
     X_Array = np.array(X)
     Y_Array = np.array(Y)
     return X_Array, Y_Array
@@ -179,6 +179,8 @@ def Train_Model(X_Train, Y_Train):
 def Evaluate_Model(X_Test, Y_Test, W1, b1, W2, b2):
     Predictions = Predict(X_Test, W1, b1, W2, b2)
     Labels = np.argmax(Y_Test, axis=1)
+    for i in range(len(Predictions)):
+        print(f"Predicted : {Predictions[i]} , Actual: {Labels[i]}")
     Accuracy = np.mean(Predictions == Labels) * 100
     print("Accuracy:", Accuracy)
 
@@ -236,26 +238,6 @@ def Predict_Multiple_Digits(Image, W1, b1, W2, b2):
     cv2.putText(Image,Result,(10, 40),cv2.FONT_HERSHEY_SIMPLEX,1,(0, 0, 255),2)
     return Image
 
-
-def Start_Live_Demo(W1, b1, W2, b2):
-
-    Camera = cv2.VideoCapture(0)
-
-    while True:
-
-        Success, Frame = Camera.read()
-        if not Success:
-            break
-
-        Output = Predict_Multiple_Digits(Frame,W1,b1,W2,b2 )
-        cv2.imshow("Digit Recognition", Output)
-        Key = cv2.waitKey(1)
-        if Key == ord('q'):
-            break
-
-    Camera.release()
-
-    cv2.destroyAllWindows()
 
 
 X, Y = Load_Dataset()
