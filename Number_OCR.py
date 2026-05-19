@@ -9,8 +9,8 @@ InputSize = 784
 HiddenSize = 128
 OutputSize = 10
 
-Epochs = 5000
-Lr = 0.1
+Epochs = 10000
+Lr = 0.01
 
 X = []
 Y = []
@@ -52,10 +52,10 @@ def Load_Dataset():
     
     plt.figure(figsize=(10, 5))
     for Digit in range(10):
-        FolderPath = os.path.join("dataset", str(Digit))
+        FolderPath = os.path.join("dataset0", str(Digit))
         
-        for ImageIndex in range(24):
-            ImagePath = os.path.join(FolderPath, f"{ImageIndex}.png")
+        for ImageIndex in range(50):
+            ImagePath = os.path.join(FolderPath, f"{ImageIndex+1}.png")
             Image = cv2.imread(ImagePath)
 
             if Image is None:
@@ -71,6 +71,7 @@ def Load_Dataset():
             Processed = Preprocess_Image(Image)
             X.append(Processed)
             Y.append(Digit)
+    
     plt.show()
     X_Array = np.array(X)
     Y_Array = np.array(Y)
@@ -166,6 +167,11 @@ def Train_Model(X_Train, Y_Train):
         Losses.append(Loss)
         if Epoch % 100 == 0:
             print("Epoch:", Epoch, "Loss:", Loss)
+        if Epoch > 0:
+            change = Loss - Losses[Epoch - 1]
+            if abs(change) < 1e-7:
+                print("Stopped early at iteration:", Epoch)
+                break
 
     plt.plot(Losses)
     plt.xlabel("Epoch")
@@ -275,6 +281,21 @@ def Test_Multiple_Digit_Images(W1, b1, W2, b2):
     plt.tight_layout()
     plt.show()
     
+def Test_Image(Image_Name, W1, b1, W2, b2):
+
+    ImagePath = os.path.join("", Image_Name)
+    Image = cv2.imread(ImagePath)
+    if Image is None:
+        print("Image not found")
+        return
+
+    Output = Predict_Multiple_Digits( Image.copy(),W1,b1,W2,b2)
+    RGB = cv2.cvtColor(Output, cv2.COLOR_BGR2RGB)
+    plt.figure(figsize=(8, 8))
+    plt.imshow(RGB)
+    plt.axis("off")
+    plt.show()
+    
 X, Y = Load_Dataset()
 Y = One_Hot_Encode(Y)
 X, Y = Shuffle_Data(X, Y)
@@ -282,3 +303,7 @@ X_Train, Y_Train, X_Test, Y_Test = Split_Data(X, Y)
 W1, b1, W2, b2 = Train_Model(X_Train, Y_Train)
 Evaluate_Model(X_Test, Y_Test, W1, b1, W2, b2)
 Test_Multiple_Digit_Images(W1, b1, W2, b2)
+
+while(True):
+    inp = input("Enter the name of image that you want to test: ")
+    Test_Image(inp, W1, b1, W2, b2)
