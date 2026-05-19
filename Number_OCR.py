@@ -183,6 +183,7 @@ def Evaluate_Model(X_Test, Y_Test, W1, b1, W2, b2):
         print(f"Predicted : {Predictions[i]} , Actual: {Labels[i]}")
     Accuracy = np.mean(Predictions == Labels) * 100
     print("Accuracy:", Accuracy)
+    Plot_Confusion_Matrix(Y_Test, Predictions)
 
 
 def Find_Contours(Image):
@@ -239,7 +240,25 @@ def Predict_Multiple_Digits(Image, W1, b1, W2, b2):
     return Image
 
 
+import seaborn as sns
 
+def Plot_Confusion_Matrix(Y_Test, Predictions):
+
+    Labels = np.argmax(Y_Test, axis=1)
+    Matrix = np.zeros((10, 10), dtype=int)
+    
+    for i in range(len(Labels)):
+        Actual = Labels[i]
+        Predicted = Predictions[i]
+        Matrix[Actual][Predicted] += 1
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(Matrix, annot=True, fmt='d', cmap='Blues')
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.show()
+    
 X, Y = Load_Dataset()
 Y = One_Hot_Encode(Y)
 X, Y = Shuffle_Data(X, Y)
