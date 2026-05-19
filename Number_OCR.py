@@ -259,9 +259,26 @@ def Plot_Confusion_Matrix(Y_Test, Predictions):
     plt.title("Confusion Matrix")
     plt.show()
     
+def Test_Multiple_Digit_Images(W1, b1, W2, b2):
+
+    plt.figure(figsize=(12, 12))
+
+    for ImageIndex in range(9):
+        ImagePath = os.path.join("dataset/multi_test", f"{ImageIndex}.png")
+        Image = cv2.imread(ImagePath)
+        Output = Predict_Multiple_Digits( Image.copy(),W1,b1,W2,b2)
+        RGB = cv2.cvtColor(Output, cv2.COLOR_BGR2RGB)
+        plt.subplot(3, 3, ImageIndex + 1)
+        plt.imshow(RGB)
+        plt.axis("off")
+
+    plt.tight_layout()
+    plt.show()
+    
 X, Y = Load_Dataset()
 Y = One_Hot_Encode(Y)
 X, Y = Shuffle_Data(X, Y)
 X_Train, Y_Train, X_Test, Y_Test = Split_Data(X, Y)
 W1, b1, W2, b2 = Train_Model(X_Train, Y_Train)
 Evaluate_Model(X_Test, Y_Test, W1, b1, W2, b2)
+Test_Multiple_Digit_Images(W1, b1, W2, b2)
